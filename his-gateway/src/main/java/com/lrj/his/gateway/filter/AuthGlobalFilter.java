@@ -27,11 +27,11 @@ import java.util.List;
  * 全局鉴权过滤器。校验 JWT,通过则把用户身份写入内部 header 透传给下游;
  * 同时剥离客户端伪造的 X-His-* header,防越权。放行白名单(登录/actuator)。
  *
- * <p>默认(HS256 自签)模式生效;{@code idp} profile 下由 OAuth2 Resource Server +
- * {@link com.lrj.his.gateway.filter.IdpIdentityGlobalFilter} 接管,本过滤器停用。
+ * <p>仅纯 HS256 模式(默认)生效;{@code idp} / {@code dual} profile 下由 OAuth2 Resource Server
+ * 接管,本过滤器停用。
  */
 @Component
-@Profile("!idp")
+@Profile("!idp & !dual")
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
 
     private static final Logger log = LoggerFactory.getLogger(AuthGlobalFilter.class);

@@ -31,7 +31,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useThemeStore } from '../store/theme';
 import { useAuth } from '../store/auth';
-import { IS_IDP, userManager } from '../auth/config';
+import { getAuthKind, userManager } from '../auth/config';
 import { MENU_MAP } from '../menu';
 import { PRESET_COLORS } from '../theme';
 import { inbox, markAllRead, markRead, unreadCount } from '../api/endpoints';
@@ -229,10 +229,10 @@ export default function AppHeader() {
                 icon: <LogoutOutlined />,
                 label: '退出登录',
                 onClick: () => {
-                  if (IS_IDP) {
-                    // idp 模式:清应用会话键 + 触发 IdP 端 RP-initiated 登出(回到 /login)
+                  if (getAuthKind() === 'sso' && userManager) {
+                    // SSO 登录:清应用会话键 + 触发 IdP 端 RP-initiated 登出(回到 /login)
                     useAuth.getState().clearSession();
-                    void userManager?.signoutRedirect();
+                    void userManager.signoutRedirect();
                   } else {
                     logout();
                     navigate('/login');

@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { message } from 'antd';
 import type { Result } from './types';
-import { IS_IDP } from '../auth/config';
+import { OIDC_ENABLED } from '../auth/config';
 
 // 统一 axios 实例。请求拦截器注入 Bearer Token;响应拦截器解包 Result<T>,
 // 业务码非 0 统一弹错并抛出;401 清登录态跳登录页。
@@ -21,9 +21,9 @@ let redirecting = false;
 function gotoLogin() {
   if (redirecting) return;
   redirecting = true;
-  // idp 模式只清应用会话键,保留 oidc-client 自身登录态(IdP 会话或可静默续期);
-  // password 模式沿用整体清理。
-  if (IS_IDP) {
+  // idp/dual 模式只清应用会话键,保留 oidc-client 自身登录态(IdP 会话或可静默续期);
+  // 纯 password 模式沿用整体清理。
+  if (OIDC_ENABLED) {
     localStorage.removeItem('his_token');
     localStorage.removeItem('his_user');
   } else {

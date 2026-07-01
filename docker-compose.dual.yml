@@ -1,0 +1,35 @@
+# 双登录叠加层 —— 网关同时接受本地 HS256(账号密码)与联合 RS256(SSO)双令牌。
+#
+#   账号密码 + SSO 共存:
+#     docker compose -f docker-compose.yml -f docker-compose.dual.yml up -d --build
+#
+# 与 idp 叠加的差异:网关 profile=dual(而非 idp)、前端 VITE_AUTH_MODE=dual(一页两入口)。
+# 仍需 his-idp(9008)提供 SSO 授权码流;账号密码走 his-auth /auth/login 签 HS256,网关按 issuer 分派。
+services:
+  idp:
+    build: { context: ., dockerfile: Dockerfile, target: idp }
+    container_name: his-idp
+    ports: ["9008:9008"]
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      IDP_ISSUER: http://localhost:9008
+    depends_on:
+      nacos: { condition: service_healthy }
+    restart: unless-stopped
+
+  gateway:
+    environment:
+      SPRING_PROFILES_ACTIVE: dual
+      IDP_JWK_SET_URI: http://his-idp:9008/oauth2/jwks
+      IDP_ISSUER: http://localhost:9008
+    depends_on:
+      nacos: { condition: service_healthy }
+      idp: { condition: service_started }
+
+  web:
+    build:
+      context: ./his-web
+      args:
+        VITE_AUTH_MODE: dual
+        VITE_OIDC_AUTHORITY: http://localhost:9008

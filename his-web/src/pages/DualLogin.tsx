@@ -1,7 +1,14 @@
 import { useState } from 'react';
-import { Form, Input, Button, Typography, Tag, Space, App, theme } from 'antd';
-import { UserOutlined, LockOutlined, MedicineBoxFilled, SafetyCertificateOutlined } from '@ant-design/icons';
+import { Form, Input, Button, Typography, Tag, Space, Divider, App, theme } from 'antd';
+import {
+  UserOutlined,
+  LockOutlined,
+  MedicineBoxFilled,
+  SafetyCertificateOutlined,
+  SafetyOutlined,
+} from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import { useAuth as useOidc } from 'react-oidc-context';
 import { login } from '../api/endpoints';
 import { useAuth } from '../store/auth';
 import { useThemeStore } from '../store/theme';
@@ -9,12 +16,17 @@ import { setAuthKind } from '../auth/config';
 
 const DEMO_ACCOUNTS = ['admin', 'doctor', 'nurse', 'cashier', 'pharmacist'];
 
-export default function PasswordLogin() {
+/**
+ * dual 模式登录页:一页两入口。左侧账号密码(走 /auth/login,HS256),右下统一身份登录(OIDC SSO)。
+ * 两条链路的令牌网关都认(多 issuer 双令牌校验)。
+ */
+export default function DualLogin() {
   const navigate = useNavigate();
   const { message } = App.useApp();
   const { token } = theme.useToken();
   const primary = useThemeStore((s) => s.primary);
   const setSession = useAuth((s) => s.setSession);
+  const oidc = useOidc();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
@@ -35,7 +47,7 @@ export default function PasswordLogin() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', background: token.colorBgLayout }}>
-      {/* 左侧品牌区:渐变 + 介绍,窄屏隐藏 */}
+      {/* 左侧品牌区 */}
       <div
         className="his-login-brand"
         style={{
@@ -67,27 +79,15 @@ export default function PasswordLogin() {
           HIS 医疗信息平台
         </div>
         <Typography.Title level={2} style={{ color: '#fff', margin: 0, maxWidth: 460 }}>
-          DDD 领域建模 · Spring Cloud 微服务 · FHIR R4
+          账号密码 + 统一身份(SSO)双登录
         </Typography.Title>
         <Typography.Paragraph style={{ color: 'rgba(255,255,255,0.85)', fontSize: 16, maxWidth: 460 }}>
-          覆盖建档、挂号、门诊医嘱、药师审方、收费结算、退费审批、病历与通知中心的一体化门诊业务平台。
+          网关同时校验本地 HS256 与联合 IdP 的 RS256 双令牌,按 issuer 分派 —— 两种登录方式共存。
         </Typography.Paragraph>
         <Space size={20} style={{ color: 'rgba(255,255,255,0.9)' }}>
-          <span><SafetyCertificateOutlined /> JWT + RBAC</span>
-          <span>事件驱动 Saga</span>
-          <span>可观测治理</span>
+          <span><SafetyCertificateOutlined /> 多 issuer 校验</span>
+          <span>OIDC 授权码 + PKCE</span>
         </Space>
-        <div
-          style={{
-            position: 'absolute',
-            right: -80,
-            bottom: -80,
-            width: 280,
-            height: 280,
-            borderRadius: '50%',
-            background: 'rgba(255,255,255,0.08)',
-          }}
-        />
       </div>
 
       {/* 右侧表单区 */}
@@ -105,7 +105,7 @@ export default function PasswordLogin() {
           <Typography.Title level={3} style={{ marginBottom: 4 }}>
             欢迎登录
           </Typography.Title>
-          <Typography.Text type="secondary">请输入账号信息进入工作台</Typography.Text>
+          <Typography.Text type="secondary">账号密码登录，或使用统一身份认证</Typography.Text>
           <Form form={form} onFinish={onFinish} size="large" style={{ marginTop: 28 }}>
             <Form.Item name="username" rules={[{ required: true, message: '请输入用户名' }]}>
               <Input prefix={<UserOutlined />} placeholder="用户名" />
@@ -117,6 +117,20 @@ export default function PasswordLogin() {
               登 录
             </Button>
           </Form>
+
+          <Divider plain style={{ color: token.colorTextTertiary, fontSize: 12 }}>
+            或
+          </Divider>
+          <Button
+            block
+            size="large"
+            icon={<SafetyOutlined />}
+            loading={oidc.isLoading}
+            onClick={() => oidc.signinRedirect()}
+          >
+            使用统一身份登录（SSO）
+          </Button>
+
           <div style={{ marginTop: 20 }}>
             <Typography.Text type="secondary" style={{ fontSize: 12 }}>
               演示账号（密码 123456，点击填入）：

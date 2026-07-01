@@ -8,7 +8,7 @@ import App from './App';
 import './styles/global.css';
 import { useThemeStore } from './store/theme';
 import { buildTheme } from './theme';
-import { IS_IDP } from './auth/config';
+import { OIDC_ENABLED } from './auth/config';
 import OidcAuthProvider from './auth/OidcAuthProvider';
 
 // 顶层订阅主题 store:模式/主色变化即时重算 antd 主题。
@@ -26,7 +26,7 @@ function Root() {
     <ConfigProvider locale={zhCN} theme={buildTheme(mode, primary)}>
       <AntdApp style={{ height: '100%' }}>
         <BrowserRouter>
-          {IS_IDP ? (
+          {OIDC_ENABLED ? (
             <OidcAuthProvider>
               <App />
             </OidcAuthProvider>

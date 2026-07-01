@@ -1,8 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** 鉴权模式:password(默认)| idp(OIDC SSO) */
-  readonly VITE_AUTH_MODE?: 'password' | 'idp';
+  /** 鉴权模式:password(默认)| idp(纯 SSO)| dual(账号密码 + SSO 共存) */
+  readonly VITE_AUTH_MODE?: 'password' | 'idp' | 'dual';
   /** idp 模式:his-idp issuer(浏览器可达),默认 http://localhost:9008 */
   readonly VITE_OIDC_AUTHORITY?: string;
   /** idp 模式:OIDC client_id,默认 his-web */

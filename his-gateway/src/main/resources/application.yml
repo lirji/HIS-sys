@@ -71,3 +71,15 @@ spring:
       resourceserver:
         jwt:
           jwk-set-uri: ${IDP_JWK_SET_URI:http://localhost:9008/oauth2/jwks}
+
+---
+# dual profile:网关同时接受本地 HS256(his-auth)与联合 RS256(his-idp)双令牌,账号密码 + SSO 共存。
+# 启用:SPRING_PROFILES_ACTIVE=dual。HS256 密钥/issuer 复用上面的 his.jwt.*;idp 端下面单列。
+spring:
+  config:
+    activate:
+      on-profile: dual
+his:
+  idp:
+    jwk-set-uri: ${IDP_JWK_SET_URI:http://localhost:9008/oauth2/jwks}
+    issuer: ${IDP_ISSUER:http://localhost:9008}
