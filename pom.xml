@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- 继承 spring-boot-starter-parent 拿依赖管理 + 插件管理 (与 risk-platform 同版本基线) -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.lrj.his</groupId>
+    <artifactId>his-platform</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>his-platform</name>
+    <description>医疗信息系统 (HIS + EMR) 微服务平台 — 作品集</description>
+
+    <modules>
+        <!-- 基础设施模块 -->
+        <module>his-common</module>
+        <module>his-api</module>
+        <module>his-security</module>
+        <!-- 网关与业务微服务随各 Step 逐步加入, 保持每步可构建 -->
+        <module>his-gateway</module>
+        <module>his-idp</module>
+        <module>his-auth</module>
+        <module>his-mdm</module>
+        <module>his-registration</module>
+        <module>his-outpatient</module>
+        <module>his-billing</module>
+        <module>his-emr</module>
+        <module>his-notify</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <spring-cloud.version>2023.0.3</spring-cloud.version>
+        <spring-cloud-alibaba.version>2023.0.1.3</spring-cloud-alibaba.version>
+        <hapi-fhir.version>7.4.0</hapi-fhir.version>
+        <spring-statemachine.version>4.0.0</spring-statemachine.version>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring Cloud Alibaba BOM (Nacos / Sentinel) -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- HAPI FHIR BOM (his-emr 用) -->
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-bom</artifactId>
+                <version>${hapi-fhir.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring StateMachine BOM (his-outpatient 医嘱状态机) -->
+            <dependency>
+                <groupId>org.springframework.statemachine</groupId>
+                <artifactId>spring-statemachine-bom</artifactId>
+                <version>${spring-statemachine.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- 平台内部模块统一版本 -->
+            <dependency>
+                <groupId>com.lrj.his</groupId>
+                <artifactId>his-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lrj.his</groupId>
+                <artifactId>his-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.lrj.his</groupId>
+                <artifactId>his-security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

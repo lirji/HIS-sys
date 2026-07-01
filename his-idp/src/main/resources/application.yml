@@ -1,0 +1,36 @@
+server:
+  port: 9008
+
+spring:
+  application:
+    name: his-idp
+  config:
+    import: optional:nacos:his-common.yaml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+his:
+  idp:
+    # issuer 必须是浏览器可达地址(签发 token 与 OIDC 元数据据此生成绝对 URL)
+    issuer: ${IDP_ISSUER:http://localhost:9008}
+    access-token-ttl-seconds: 3600
+    redirect-uris:
+      - http://localhost:5173/oidc-callback
+      - http://localhost:8088/oidc-callback
+    post-logout-redirect-uris:
+      - http://localhost:5173/login
+      - http://localhost:8088/login
+    web-origins:
+      - http://localhost:5173
+      - http://localhost:8088

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="his-api" />
+        <module name="his-common" />
+        <module name="his-emr" />
+        <module name="his-outpatient" />
+        <module name="his-mdm" />
+        <module name="his-idp" />
+        <module name="his-registration" />
+        <module name="his-notify" />
+        <module name="his-security" />
+        <module name="his-gateway" />
+        <module name="his-auth" />
+        <module name="his-billing" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="his-api" options="-parameters" />
+      <module name="his-auth" options="-parameters" />
+      <module name="his-billing" options="-parameters" />
+      <module name="his-common" options="-parameters" />
+      <module name="his-emr" options="-parameters" />
+      <module name="his-gateway" options="-parameters" />
+      <module name="his-idp" options="-parameters" />
+      <module name="his-mdm" options="-parameters" />
+      <module name="his-notify" options="-parameters" />
+      <module name="his-outpatient" options="-parameters" />
+      <module name="his-registration" options="-parameters" />
+      <module name="his-security" options="-parameters" />
+    </option>
+  </component>
+</project>

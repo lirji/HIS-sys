@@ -1,0 +1,37 @@
+# SSO / OIDC 叠加层 —— 让网关切成 OAuth2 Resource Server,对接 his-idp 授权服务器。
+#
+#   基础(password/HS256,默认主线):  docker compose up -d --build
+#   SSO(idp/OIDC 授权码+PKCE):       docker compose -f docker-compose.yml -f docker-compose.idp.yml up -d --build
+#
+# 叠加层新增 his-idp 服务(9008),并覆盖:网关启用 idp profile + JWK 端点、前端以 idp 模式重新构建。
+# 浏览器登录经 his-idp(localhost:9008)授权码回跳前端;网关经 http://his-idp:9008/oauth2/jwks 验签 RS256。
+services:
+  idp:
+    build: { context: ., dockerfile: Dockerfile, target: idp }
+    container_name: his-idp
+    ports: ["9008:9008"]
+    environment:
+      SPRING_CLOUD_NACOS_DISCOVERY_SERVER_ADDR: nacos:8848
+      SPRING_CLOUD_NACOS_CONFIG_SERVER_ADDR: nacos:8848
+      # issuer 必须是浏览器可达地址(签发 token 与 OIDC 元数据据此生成绝对 URL)
+      IDP_ISSUER: http://localhost:9008
+    depends_on:
+      nacos: { condition: service_healthy }
+    restart: unless-stopped
+
+  gateway:
+    # 覆盖:启用 idp profile,JWK 端点走容器内 DNS 到 his-idp
+    environment:
+      SPRING_PROFILES_ACTIVE: idp
+      IDP_JWK_SET_URI: http://his-idp:9008/oauth2/jwks
+    depends_on:
+      nacos: { condition: service_healthy }
+      idp: { condition: service_started }
+
+  web:
+    # 覆盖:以 idp(SSO)模式重新构建前端产物
+    build:
+      context: ./his-web
+      args:
+        VITE_AUTH_MODE: idp
+        VITE_OIDC_AUTHORITY: http://localhost:9008

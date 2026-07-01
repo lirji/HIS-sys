@@ -1,0 +1,49 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: his-auth
+  threads:
+    virtual:
+      enabled: true          # JDK21 虚拟线程, IO 密集场景吞吐更优
+  datasource:
+    url: jdbc:postgresql://localhost:5433/his_auth
+    username: his
+    password: his123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none         # 由 Flyway 管理 schema
+    open-in-view: false
+    properties:
+      hibernate.format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  # Nacos 配置中心(可选): 有则覆盖本地, 无则用本地 application.yml 跑通
+  config:
+    import: optional:nacos:his-common.yaml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+# JWT(dev 默认值; prod 放 Nacos 共享配置 his-common.yaml, 与 gateway 同密钥)
+his:
+  jwt:
+    secret: his-platform-dev-secret-change-me-in-prod-please-32b
+    ttl-seconds: 7200
+    issuer: his-auth

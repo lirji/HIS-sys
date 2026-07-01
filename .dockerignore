@@ -1,0 +1,8 @@
+# 后端镜像构建上下文:排除产物、前端、IDE、VCS,jar 在容器内重新构建保证可复现
+**/target
+his-web
+.git
+.idea
+*.log
+*.iml
+.DS_Store

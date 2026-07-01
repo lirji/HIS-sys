@@ -1,0 +1,18 @@
+global:
+  scrape_interval: 15s
+
+# 宿主机上运行的各微服务 actuator 端点。容器内访问宿主机用 host.docker.internal。
+scrape_configs:
+  - job_name: 'his-services'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'host.docker.internal:9000'   # gateway
+          - 'host.docker.internal:9001'   # auth
+          - 'host.docker.internal:9002'   # mdm
+          - 'host.docker.internal:9003'   # registration
+          - 'host.docker.internal:9004'   # outpatient
+          - 'host.docker.internal:9005'   # emr
+          - 'host.docker.internal:9006'   # billing
+          - 'host.docker.internal:9007'   # notify
+          - 'host.docker.internal:9008'   # idp (仅 SSO/idp 模式启用)

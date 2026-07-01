@@ -1,0 +1,73 @@
+server:
+  port: 9000
+
+spring:
+  application:
+    name: his-gateway
+  config:
+    import: optional:nacos:his-common.yaml
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+    gateway:
+      discovery:
+        locator:
+          enabled: false        # 用显式路由, 不暴露全部服务
+      routes:
+        - id: his-auth
+          uri: lb://his-auth
+          predicates:
+            - Path=/auth/**
+        - id: his-mdm
+          uri: lb://his-mdm
+          predicates:
+            - Path=/mdm/**
+        - id: his-registration
+          uri: lb://his-registration
+          predicates:
+            - Path=/reg/**
+        - id: his-outpatient
+          uri: lb://his-outpatient
+          predicates:
+            - Path=/outpatient/**
+        - id: his-billing
+          uri: lb://his-billing
+          predicates:
+            - Path=/billing/**
+        - id: his-emr
+          uri: lb://his-emr
+          predicates:
+            - Path=/emr/**,/fhir/**
+        - id: his-notify
+          uri: lb://his-notify
+          predicates:
+            - Path=/notify/**
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway
+
+his:
+  jwt:
+    secret: his-platform-dev-secret-change-me-in-prod-please-32b
+    ttl-seconds: 7200
+    issuer: his-auth
+
+---
+# idp profile:网关作为 OAuth2 Resource Server,对接 his-idp 授权服务器(RS256 + JWK)。
+# 启用:SPRING_PROFILES_ACTIVE=idp。JWK 端点为服务间调用,容器内用 IDP_JWK_SET_URI 覆盖为 http://his-idp:9008/oauth2/jwks
+spring:
+  config:
+    activate:
+      on-profile: idp
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${IDP_JWK_SET_URI:http://localhost:9008/oauth2/jwks}
